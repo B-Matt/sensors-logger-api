@@ -1,0 +1,34 @@
+services: # services which our app going to use. (list of containers we want to create)
+  sensor-logger-mongo: # container name 
+    image: mongo # which image container will build on
+    ports:
+      - "27017:27017"
+    networks: # adding network
+      - sensor-logger-app
+    volumes:
+      - mongo-data:/data/db
+
+  sensor-logger-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodejs
+    container_name: sensor-logger-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    networks: # adding network
+      - sensor-logger-app
+    depends_on:
+      - sensor-logger-mongo
+
+networks: # allow services to talk to each other while providing isolation from other docker container, running on the same host
+  sensor-logger-app:
+    driver: bridge
+
+volumes: # enable persistence of database data across container restart
+  mongo-data:
+    driver: local
+  node_modules:
