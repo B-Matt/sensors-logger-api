@@ -14,7 +14,7 @@ mongoose.connect(process.env.DB_HOST).then(() => {
     console.error('[SENSORS-LOGGER-API]: Error connecting to MongoDB:', error);
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`[SENSORS-LOGGER-API]: Server is running on http://localhost:${PORT}`);
 });
 
@@ -39,6 +39,9 @@ app.post('/log', (req, res) => {
 });
 
 app.get('/logs', (req, res) => {
+    const limit = 10;
+    const sort = { timestamp: -1 };
+
     SensorData.find()
         .then((data) => {
             res.status(200).json(data);
@@ -46,5 +49,5 @@ app.get('/logs', (req, res) => {
         .catch((error) => {
             console.error('[SENSORS-LOGGER-API]: Error retrieving sensor data from MongoDB:', error);
             res.status(500).send('Error retrieving data');
-        });
+        }).sort(sort).limit(limit)
 });
